@@ -1,33 +1,61 @@
 ---
 title: "Nobel winners"
-author: "Naomi Ekas"
+author: "Kevin Diegel"
 output: github_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r load-packages, message=FALSE}
 library(tidyverse)
+library(readr)
+library(readxl)
+library(knitr)
+library(janitor)
+```
+
+
+```{r noerror}
+knitr::opts_chunk$set(error = TRUE, message = TRUE)
 ```
 
 Let's first load the data:
 
-```{r label-me1, eval=FALSE}
-nobel <- ___(___)
+```{r wholedata, eval=FALSE}
+nobel <- read.csv("./data-raw/nobel.csv")
 ```
 
 Then let's split the data into two:
 
-```{r label-me2, eval=FALSE}
-# stem laureates
-___ <- nobel %>%
-  filter(___)
+```{r stem, eval=FALSE}
+nobelstem <- nobel %>%
+  filter(category %in% c("Physics", "Chemistry", "Medicine", "Economics"))
+```
 
-# non-steam laureates
-___ <- nobel %>%
-  filter(___)
+```{r nonstem}
+nonstem <- nobel %>%
+  filter(!category %in% c("Physics", "Chemistry", "Medicine", "Economics"))
 ```
 
 And finally write out the data:
 
 ```{r label-me3}
-# add code for writing out the two data frames here
+write.csv(nobelstem, file = "./data/nobelstem.csv")
+write.csv(nonstem, file ="./data/nonstem.csv")
 ```
+
+Sales:
+
+```{r salesimport}
+sales <- read_excel(path = "./data-raw/sales.xlsx", skip = 3, col_names = c("id", "n"))
+```
+
+```{r brand}
+sales %>%
+mutate(is_brand_name = str_detect(id, "Brand")) %>%
+mutate(brand = if_else(is_brand_name, id, NULL)) %>%
+fill(brand) %>%
+filter(!is_brand_name)%>%
+select(brand, id, n)
+```
+
